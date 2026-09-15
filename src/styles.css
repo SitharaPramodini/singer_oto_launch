@@ -25,6 +25,11 @@
   --oto-wine-500: #9e0450;
   --oto-wine-300: #c46869;
 
+  /* ---- Silver accent (launch only, outside the OTO palette) ---- */
+  --silver-hi: #ffffff;
+  --silver: #c8c8d0;
+  --silver-deep: #999999;
+
   /* ---- Gold accent (launch only, outside the OTO palette) ---- */
   --gold-pale: #f7e7bd;
   --gold: #ffd76e;
@@ -62,41 +67,47 @@
   --radius-lg: 28px;
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+/* Element resets live in @layer base: unlayered rules beat every
+   Tailwind utility regardless of specificity, so `* { padding: 0 }`
+   and `button { background: none }` were silently killing px-*, py-*,
+   bg-* and text-* everywhere they were used. */
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
 
-html {
-  scroll-behavior: smooth;
-}
+  html {
+    scroll-behavior: smooth;
+  }
 
-body {
-  font-family: var(--font-sans);
-  color: var(--oto-orchid-300);
-  background: var(--oto-black);
-  background-attachment: fixed;
-  min-height: 100vh;
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-  line-height: 1.6;
-}
+  body {
+    font-family: var(--font-sans);
+    color: var(--oto-orchid-300);
+    background: var(--oto-black);
+    background-attachment: fixed;
+    min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.6;
+  }
 
-img {
-  max-width: 100%;
-  display: block;
-}
-button {
-  font-family: inherit;
-  cursor: pointer;
-  border: none;
-  background: none;
-  color: inherit;
-}
-a {
-  color: inherit;
-  text-decoration: none;
+  img {
+    max-width: 100%;
+    display: block;
+  }
+  button {
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+    background: none;
+    color: inherit;
+  }
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
 }
 
 /* ============================================================
@@ -107,21 +118,21 @@ a {
     /* specular glint that travels across the letters */
     linear-gradient(
       105deg,
-      rgba(255, 246, 214, 0) 38%,
-      rgba(255, 246, 214, 0.35) 46%,
-      rgba(255, 255, 255, 0.95) 50%,
-      rgba(255, 246, 214, 0.35) 54%,
-      rgba(255, 246, 214, 0) 62%
+      rgba(245, 240, 255, 0) 38%,
+      rgba(245, 240, 255, 0.4) 46%,
+      rgba(255, 255, 255, 1) 50%,
+      rgba(245, 240, 255, 0.4) 54%,
+      rgba(245, 240, 255, 0) 62%
     ),
-    /* brushed gold underneath */
+    /* brushed silver, tinted with light purple */
     linear-gradient(
         180deg,
-        var(--gold-pale) 0%,
-        var(--gold) 20%,
-        var(--gold-metal) 46%,
-        var(--gold-deep) 60%,
-        var(--gold-metal) 76%,
-        var(--gold) 100%
+        var(--silver-hi) 0%,
+        var(--oto-orchid-300) 18%,
+        var(--oto-violet-300) 40%,
+        var(--silver-deep) 56%,
+        var(--oto-orchid-300) 74%,
+        var(--silver) 100%
       );
   background-size:
     260% 100%,
@@ -133,8 +144,8 @@ a {
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  -webkit-text-stroke: 1px rgba(168, 120, 28, 0.55);
-  filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.35));
+  -webkit-text-stroke: 1px rgba(198, 133, 255, 0.5);
+  filter: drop-shadow(0 0 20px rgba(198, 133, 255, 0.35));
   animation: title-shine 4.5s ease-in-out infinite;
 }
 
@@ -181,7 +192,7 @@ a {
 /* If the text can't be clipped to the gradient, keep it legible. */
 @supports not ((background-clip: text) or (-webkit-background-clip: text)) {
   .launch-title {
-    color: var(--gold);
+    color: var(--oto-orchid-300);
     animation: none;
   }
 }
@@ -224,7 +235,20 @@ a {
 }
 
 .countdown-number {
+  /* Plain CSS gradient: Tailwind v4 emits `in oklab`, which some browsers
+     reject outright, leaving clipped text with no fill at all. */
+  background-image: linear-gradient(180deg, var(--oto-orchid-300) 0%, var(--oto-violet-300) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 40px rgba(198, 133, 255, 0.5));
   animation: countdown-pop var(--count-dur, 900ms) cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@supports not ((background-clip: text) or (-webkit-background-clip: text)) {
+  .countdown-number {
+    color: var(--oto-orchid-300);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

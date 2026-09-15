@@ -132,7 +132,13 @@ export default function CurtainReveal({
               transform: open ? `translateX(calc(-1 * ${travel}))` : "translateX(0)",
             }}
           >
-            <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-black/45 via-black/15 to-transparent" />
+            <div
+              className="absolute inset-y-0 right-0 w-24"
+              style={{
+                backgroundImage:
+                  "linear-gradient(to left, rgba(0,0,0,0.45), rgba(0,0,0,0.15) 50%, rgba(0,0,0,0))",
+              }}
+            />
           </div>
 
           {/* Right panel */}
@@ -144,7 +150,13 @@ export default function CurtainReveal({
               transform: open ? `translateX(${travel})` : "translateX(0)",
             }}
           >
-            <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-black/45 via-black/15 to-transparent" />
+            <div
+              className="absolute inset-y-0 left-0 w-24"
+              style={{
+                backgroundImage:
+                  "linear-gradient(to right, rgba(0,0,0,0.45), rgba(0,0,0,0.15) 50%, rgba(0,0,0,0))",
+              }}
+            />
           </div>
         </div>
 
@@ -154,7 +166,7 @@ export default function CurtainReveal({
             <button
               type="button"
               onClick={() => setPhase("counting")}
-              className="border border-[var(--gold-metal)]/70 bg-black/40 px-10 py-4 text-xs tracking-[0.3em] text-[var(--gold-pale)] uppercase transition-colors duration-300 hover:bg-[var(--gold-metal)]/20 focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:outline-none sm:text-sm"
+              className="rounded-full border border-[var(--silver-hi)] px-9 py-3.5 font-[family-name:var(--font-poppins)] text-xs font-medium tracking-[0.2em] text-[var(--silver-hi)] uppercase transition-colors duration-300 ease-out hover:bg-[rgba(255,255,255,0.12)] focus-visible:ring-2 focus-visible:ring-[var(--silver-hi)] focus-visible:ring-offset-4 focus-visible:ring-offset-transparent focus-visible:outline-none sm:px-11 sm:py-4 sm:text-sm"
             >
               Let&rsquo;s Go Live
             </button>
@@ -165,7 +177,7 @@ export default function CurtainReveal({
               key={count}
               role="status"
               aria-live="assertive"
-              className="countdown-number bg-gradient-to-b from-[var(--oto-orchid-300)] to-[var(--oto-violet-300)] bg-clip-text font-[family-name:var(--font-poppins)] text-[clamp(6rem,26vw,18rem)] leading-none font-semibold text-transparent drop-shadow-[0_0_40px_rgba(198,133,255,0.5)]"
+              className="countdown-number font-[family-name:var(--font-poppins)] text-[clamp(6rem,26vw,18rem)] leading-none font-semibold"
               style={{ "--count-dur": `${countInterval}ms` }}
             >
               {count}
