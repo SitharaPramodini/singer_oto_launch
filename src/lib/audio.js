@@ -4,6 +4,10 @@ import tropicalSrc from "@/assets/tropical.mp3";
 const TROPICAL_FULL = 0.85;
 const TROPICAL_DUCKED = 0.3;
 
+// Once the intro takes over, the bed is done for good — nothing may
+// restart it (a late gesture-fallback would otherwise play over the video).
+let tropicalRetired = false;
+
 const cache = new Map();
 const ramps = new Map();
 
@@ -58,8 +62,47 @@ export const stopCountdown = () => {
   el.currentTime = 0;
 };
 
-export const playTropical = () => play(tropicalSrc, { loop: true, volume: TROPICAL_FULL });
+/** Starts the bed, or leaves it running if it already is. */
+export function playTropical() {
+  if (tropicalRetired) return Promise.resolve();
+  const el = get(tropicalSrc, true);
+  cancelAnimationFrame(ramps.get(tropicalSrc));
+  el.volume = TROPICAL_FULL;
+  if (!el.paused) return Promise.resolve();
+  return el.play();
+}
+
+/**
+ * Try to start the music immediately. Browsers block audio that isn't tied
+ * to a user gesture, so if that's refused we arm the first interaction —
+ * a mouse move is enough — and start then.
+ */
+export function startTropicalAsap() {
+  const EVENTS = ["pointerdown", "pointermove", "keydown", "touchstart", "wheel"];
+  let armed = false;
+
+  const disarm = () => {
+    if (!armed) return;
+    armed = false;
+    EVENTS.forEach((e) => window.removeEventListener(e, onGesture));
+  };
+
+  const onGesture = () => {
+    playTropical().then(disarm, () => {});
+  };
+
+  playTropical().catch(() => {
+    armed = true;
+    EVENTS.forEach((e) => window.addEventListener(e, onGesture, { passive: true }));
+  });
+
+  return disarm;
+}
+
 /** Pull the music back so the countdown reads clearly over it. */
 export const duckTropical = () => ramp(tropicalSrc, TROPICAL_DUCKED, 500);
 export const swellTropical = () => ramp(tropicalSrc, TROPICAL_FULL, 700);
-export const stopTropical = () => ramp(tropicalSrc, 0, 600, true);
+export const stopTropical = () => {
+  tropicalRetired = true;
+  ramp(tropicalSrc, 0, 600, true);
+};

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import curtainImg from "@/assets/curtain.png";
 import { cn } from "@/lib/utils";
-import { duckTropical, playCountdown, playTropical } from "@/lib/audio";
+import { duckTropical, playCountdown, playTropical, startTropicalAsap } from "@/lib/audio";
 
 /**
  * Holds the stage closed until the visitor presses a key or taps, counts
@@ -31,6 +31,9 @@ export default function CurtainReveal({
   onOpenRef.current = onOpen;
   const onRevealedRef = useRef(onRevealed);
   onRevealedRef.current = onRevealed;
+
+  // Music from the moment the page is usable, not just from the click.
+  useEffect(() => startTropicalAsap(), []);
 
   // Music alone for a beat, then the count starts over the top of it.
   useEffect(() => {

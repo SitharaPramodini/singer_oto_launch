@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
  * The element stays mounted from the start so the file buffers during
  * the curtain sequence instead of stalling when it's called for.
  */
-export default function IntroVideo({ active, src = introSrc, onEnded }) {
+export default function IntroVideo({ active, src = introSrc, onPlaying, onEnded }) {
   const videoRef = useRef(null);
   const [shown, setShown] = useState(false);
 
@@ -31,6 +31,12 @@ export default function IntroVideo({ active, src = introSrc, onEnded }) {
 
     return () => cancelAnimationFrame(raf);
   }, [active]);
+
+  // Fires when frames actually start rendering, not when we merely ask it
+  // to play — with a large file those can be seconds apart.
+  const handlePlaying = () => {
+    onPlaying?.();
+  };
 
   const handleEnded = () => {
     // Pausing leaves the last decoded frame on screen.
@@ -57,6 +63,7 @@ export default function IntroVideo({ active, src = introSrc, onEnded }) {
         controls={false}
         disablePictureInPicture
         controlsList="nodownload noplaybackrate noremoteplayback"
+        onPlaying={handlePlaying}
         onEnded={handleEnded}
         onContextMenu={(e) => e.preventDefault()}
       />

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import CurtainReveal from "@/components/CurtainReveal";
 import CurtainHeader from "@/components/CurtainHeader";
 import IntroVideo from "@/components/IntroVideo";
+import QrScreen from "@/components/QrScreen";
 import { cn } from "@/lib/utils";
 import { stopCountdown, stopTropical, swellTropical } from "@/lib/audio";
 
@@ -11,7 +12,7 @@ const TITLE_HOLD_MS = 2800;
 const TITLE_EXIT_MS = 900;
 
 export default function App() {
-  // curtain -> title -> exiting -> video
+  // curtain -> title -> exiting -> video -> qr
   const [stage, setStage] = useState("curtain");
 
   useEffect(() => {
@@ -19,24 +20,21 @@ export default function App() {
       const t = setTimeout(() => setStage("exiting"), TITLE_HOLD_MS);
       return () => clearTimeout(t);
     }
-    if (stage === "video") {
-      // Hand the soundstage over to the intro.
-      stopTropical();
-      return;
-    }
     if (stage === "exiting") {
       const t = setTimeout(() => setStage("video"), TITLE_EXIT_MS);
       return () => clearTimeout(t);
     }
   }, [stage]);
 
-  const leaving = stage === "exiting" || stage === "video";
+  const leaving = stage === "exiting" || stage === "video" || stage === "qr";
+  // Anything playing full-bleed: the valance stays lifted for both.
+  const fullBleed = stage === "video" || stage === "qr";
 
   return (
     <>
       {/* Sits above the curtain panels, so they part underneath it.
           Lifts away once the intro takes over. */}
-      <CurtainHeader show={stage !== "video"} />
+      <CurtainHeader show={!fullBleed} />
 
       <CurtainReveal
         onOpen={() => {
@@ -64,7 +62,15 @@ export default function App() {
         </main>
       </CurtainReveal>
 
-      <IntroVideo active={stage === "video"} />
+      <IntroVideo
+        active={stage === "video"}
+        // Cut the music the instant the intro's own audio begins, so the
+        // bed covers any buffering gap rather than leaving silence.
+        onPlaying={stopTropical}
+        onEnded={() => setStage("qr")}
+      />
+
+      <QrScreen active={stage === "qr"} />
     </>
   );
 }
