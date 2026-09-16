@@ -3,6 +3,7 @@ import CurtainReveal from "@/components/CurtainReveal";
 import CurtainHeader from "@/components/CurtainHeader";
 import IntroVideo from "@/components/IntroVideo";
 import { cn } from "@/lib/utils";
+import { stopCountdown, stopTropical, swellTropical } from "@/lib/audio";
 
 // How long the launch title holds before it bows out.
 const TITLE_HOLD_MS = 2800;
@@ -18,6 +19,11 @@ export default function App() {
       const t = setTimeout(() => setStage("exiting"), TITLE_HOLD_MS);
       return () => clearTimeout(t);
     }
+    if (stage === "video") {
+      // Hand the soundstage over to the intro.
+      stopTropical();
+      return;
+    }
     if (stage === "exiting") {
       const t = setTimeout(() => setStage("video"), TITLE_EXIT_MS);
       return () => clearTimeout(t);
@@ -32,7 +38,14 @@ export default function App() {
           Lifts away once the intro takes over. */}
       <CurtainHeader show={stage !== "video"} />
 
-      <CurtainReveal onRevealed={() => setStage("title")}>
+      <CurtainReveal
+        onOpen={() => {
+          // Countdown track is done; let the music come back up.
+          stopCountdown();
+          swellTropical();
+        }}
+        onRevealed={() => setStage("title")}
+      >
         <main className="flex min-h-screen flex-col items-center justify-center px-[calc(var(--curtain-side)+1.5rem)] pt-[var(--valance-h)] text-center">
           <h1
             className={cn(

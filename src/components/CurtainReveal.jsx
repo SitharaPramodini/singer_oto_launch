@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import curtainImg from "@/assets/curtain.png";
 import { cn } from "@/lib/utils";
-import { playTick, primeAudio } from "@/lib/countdownSound";
+import { duckTropical, playCountdown, playTropical } from "@/lib/audio";
 
 /**
  * Holds the stage closed until the visitor presses a key or taps, counts
  * them in, then parts the curtains.
  *
- * Phases: loading -> waiting -> counting -> opening -> done
+ * Phases: loading -> waiting -> leadin -> counting -> opening -> done
  *
  * The panels are two halves of the same picture (background-size 200%),
  * so closed they read as one continuous drape.
@@ -16,7 +16,10 @@ export default function CurtainReveal({
   children,
   duration = 2400,
   countFrom = 5,
-  countInterval = 900,
+  // 5 beats at 2s ≈ the 10.9s countdown.mp3, so the track isn't cut short.
+  countInterval = 2000,
+  // Music-only beat between the click and the first number.
+  leadIn = 3000,
   className,
   onOpen,
   onRevealed,
@@ -28,6 +31,17 @@ export default function CurtainReveal({
   onOpenRef.current = onOpen;
   const onRevealedRef = useRef(onRevealed);
   onRevealedRef.current = onRevealed;
+
+  // Music alone for a beat, then the count starts over the top of it.
+  useEffect(() => {
+    if (phase !== "leadin") return;
+    const t = setTimeout(() => {
+      duckTropical();
+      playCountdown();
+      setPhase("counting");
+    }, leadIn);
+    return () => clearTimeout(t);
+  }, [phase, leadIn]);
 
   const open = phase === "opening" || phase === "done";
   const finished = phase === "done";
@@ -48,17 +62,6 @@ export default function CurtainReveal({
       cancelled = true;
     };
   }, []);
-
-  // One blip per number; dedup by value so React's double-invoked effects
-  // in dev don't fire it twice.
-  const lastTickRef = useRef(null);
-  useEffect(() => {
-    if (phase !== "counting") return;
-    if (lastTickRef.current === count) return;
-    lastTickRef.current = count;
-    if (count > 0) playTick({ frequency: 720 });
-    else playTick({ frequency: 1180, duration: 0.55, volume: 0.2 });
-  }, [phase, count]);
 
   // 5... 4... 3... 2... 1...
   useEffect(() => {
@@ -178,8 +181,8 @@ export default function CurtainReveal({
             <button
               type="button"
               onClick={() => {
-                primeAudio();
-                setPhase("counting");
+                playTropical();
+                setPhase("leadin");
               }}
               className="rounded-full border border-[var(--silver-hi)] px-9 py-3.5 font-[family-name:var(--font-poppins)] text-xs font-medium tracking-[0.2em] text-[var(--silver-hi)] uppercase transition-colors duration-300 ease-out hover:bg-[rgba(255,255,255,0.12)] focus-visible:ring-2 focus-visible:ring-[var(--silver-hi)] focus-visible:ring-offset-4 focus-visible:ring-offset-transparent focus-visible:outline-none sm:px-11 sm:py-4 sm:text-sm"
             >
