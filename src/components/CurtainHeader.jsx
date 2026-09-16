@@ -23,9 +23,6 @@ export default function CurtainHeader({ children, show = true, className }) {
           backgroundSize: "100% 100%",
           backgroundPosition: "top center",
           backgroundRepeat: "no-repeat",
-          // A violet glow, not a shadow: black on black would be invisible.
-          filter:
-            "drop-shadow(0 8px 18px rgba(212, 175, 55, 0.45)) drop-shadow(0 2px 4px rgba(255, 215, 110, 0.6))",
         }}
       />
       {children && (
