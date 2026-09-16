@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import curtainImg from "@/assets/curtain.png";
 import { cn } from "@/lib/utils";
+import { playTick, primeAudio } from "@/lib/countdownSound";
 
 /**
  * Holds the stage closed until the visitor presses a key or taps, counts
@@ -14,7 +15,7 @@ import { cn } from "@/lib/utils";
 export default function CurtainReveal({
   children,
   duration = 2400,
-  countFrom = 3,
+  countFrom = 5,
   countInterval = 900,
   className,
   onOpen,
@@ -48,7 +49,18 @@ export default function CurtainReveal({
     };
   }, []);
 
-  // 3... 2... 1...
+  // One blip per number; dedup by value so React's double-invoked effects
+  // in dev don't fire it twice.
+  const lastTickRef = useRef(null);
+  useEffect(() => {
+    if (phase !== "counting") return;
+    if (lastTickRef.current === count) return;
+    lastTickRef.current = count;
+    if (count > 0) playTick({ frequency: 720 });
+    else playTick({ frequency: 1180, duration: 0.55, volume: 0.2 });
+  }, [phase, count]);
+
+  // 5... 4... 3... 2... 1...
   useEffect(() => {
     if (phase !== "counting") return;
 
@@ -165,7 +177,10 @@ export default function CurtainReveal({
           {phase === "waiting" && (
             <button
               type="button"
-              onClick={() => setPhase("counting")}
+              onClick={() => {
+                primeAudio();
+                setPhase("counting");
+              }}
               className="rounded-full border border-[var(--silver-hi)] px-9 py-3.5 font-[family-name:var(--font-poppins)] text-xs font-medium tracking-[0.2em] text-[var(--silver-hi)] uppercase transition-colors duration-300 ease-out hover:bg-[rgba(255,255,255,0.12)] focus-visible:ring-2 focus-visible:ring-[var(--silver-hi)] focus-visible:ring-offset-4 focus-visible:ring-offset-transparent focus-visible:outline-none sm:px-11 sm:py-4 sm:text-sm"
             >
               Let&rsquo;s Go Live

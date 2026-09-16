@@ -28,8 +28,9 @@ export default function App() {
 
   return (
     <>
-      {/* Sits above the curtain panels, so they part underneath it. */}
-      <CurtainHeader />
+      {/* Sits above the curtain panels, so they part underneath it.
+          Lifts away once the intro takes over. */}
+      <CurtainHeader show={stage !== "video"} />
 
       <CurtainReveal onRevealed={() => setStage("title")}>
         <main className="flex min-h-screen flex-col items-center justify-center px-[calc(var(--curtain-side)+1.5rem)] pt-[var(--valance-h)] text-center">
